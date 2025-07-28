@@ -11,6 +11,8 @@ export interface Product {
   stock: number;
   description: string;
   images: string[];
+  originalPrice?: number;
+  discount?: number;
 }
 
 export interface CartItem {

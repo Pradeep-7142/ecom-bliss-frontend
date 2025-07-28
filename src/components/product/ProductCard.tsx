@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
+  layout?: 'grid' | 'list';
   className?: string;
 }
 
@@ -148,4 +149,5 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
   );
 };
 
+export { ProductCard };
 export default ProductCard;
