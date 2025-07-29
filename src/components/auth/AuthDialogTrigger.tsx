@@ -8,15 +8,10 @@ export const AuthDialogTrigger: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="sm" onClick={() => setAuthDialogOpen(true)}>
-          <User className="h-5 w-5 mr-2" />
-          Login
-        </Button>
-        <Button size="sm" onClick={() => setAuthDialogOpen(true)}>
-          Sign Up
-        </Button>
-      </div>
+      <Button variant="ghost" size="sm" onClick={() => setAuthDialogOpen(true)}>
+        <User className="h-5 w-5 mr-2" />
+        Login
+      </Button>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
     </>
   );

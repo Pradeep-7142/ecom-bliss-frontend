@@ -12,12 +12,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Phone, Chrome, Facebook, Twitter } from 'lucide-react';
+import { Mail, Phone, Chrome, Facebook, Twitter, ArrowLeft } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -45,7 +44,7 @@ interface AuthDialogProps {
 }
 
 export const AuthDialog: React.FC<AuthDialogProps> = ({ open, onOpenChange }) => {
-  const [activeTab, setActiveTab] = useState('login');
+  const [isSignupMode, setIsSignupMode] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState('');
   const [tempSignupData, setTempSignupData] = useState<any>(null);
@@ -117,6 +116,7 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ open, onOpenChange }) =>
         setShowOTP(false);
         setOtp('');
         setTempSignupData(null);
+        setIsSignupMode(false);
       } else {
         toast({
           title: "Error",
@@ -140,25 +140,39 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ open, onOpenChange }) =>
     });
   };
 
+  const resetForm = () => {
+    setIsSignupMode(false);
+    setShowOTP(false);
+    setOtp('');
+    setTempSignupData(null);
+    loginForm.reset();
+    signupForm.reset();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      onOpenChange(newOpen);
+      if (!newOpen) {
+        resetForm();
+      }
+    }}>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Welcome Back</DialogTitle>
+          <DialogTitle>
+            {showOTP ? 'Verify Your Phone' : (isSignupMode ? 'Create Account' : 'Welcome Back')}
+          </DialogTitle>
           <DialogDescription>
-            Sign in to your account or create a new one
+            {showOTP 
+              ? `Enter the 6-digit code sent to ${tempSignupData?.mobile}`
+              : (isSignupMode 
+                ? 'Create a new account to get started'
+                : 'Sign in to your account or create a new one')
+            }
           </DialogDescription>
         </DialogHeader>
 
         {showOTP ? (
           <div className="space-y-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold">Verify Your Phone</h3>
-              <p className="text-sm text-muted-foreground">
-                Enter the 6-digit code sent to {tempSignupData?.mobile}
-              </p>
-            </div>
-            
             <div className="flex justify-center">
               <InputOTP
                 maxLength={6}
@@ -185,243 +199,269 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ open, onOpenChange }) =>
                 onClick={() => setShowOTP(false)}
                 className="w-full"
               >
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Signup
               </Button>
             </div>
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="login" className="space-y-4">
-              {/* Social Login Buttons */}
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  onClick={() => handleSocialLogin('Google')}
-                  className="w-full"
-                >
-                  <Chrome className="mr-2 h-4 w-4" />
-                  Continue with Google
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleSocialLogin('Facebook')}
-                  className="w-full"
-                >
-                  <Facebook className="mr-2 h-4 w-4" />
-                  Continue with Facebook
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleSocialLogin('Twitter')}
-                  className="w-full"
-                >
-                  <Twitter className="mr-2 h-4 w-4" />
-                  Continue with Twitter
-                </Button>
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+          <div className="space-y-4">
+            {!isSignupMode ? (
+              // Login Form
+              <>
+                {/* Social Login Buttons */}
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialLogin('Google')}
+                    className="w-full"
+                  >
+                    <Chrome className="mr-2 h-4 w-4" />
+                    Continue with Google
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialLogin('Facebook')}
+                    className="w-full"
+                  >
+                    <Facebook className="mr-2 h-4 w-4" />
+                    Continue with Facebook
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialLogin('Twitter')}
+                    className="w-full"
+                  >
+                    <Twitter className="mr-2 h-4 w-4" />
+                    Continue with Twitter
+                  </Button>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or</span>
-                </div>
-              </div>
 
-              {/* Email Login Form */}
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...loginForm.register('email')}
-                    className="mt-1"
-                  />
-                  {loginForm.formState.errors.email && (
-                    <p className="text-sm text-destructive mt-1">
-                      {loginForm.formState.errors.email.message}
-                    </p>
-                  )}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    {...loginForm.register('password')}
-                    className="mt-1"
-                  />
-                  {loginForm.formState.errors.password && (
-                    <p className="text-sm text-destructive mt-1">
-                      {loginForm.formState.errors.password.message}
-                    </p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full">
-                  <Mail className="mr-2 h-4 w-4" />
-                  Sign In with Email
-                </Button>
-              </form>
-            </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                {/* Email Login Form */}
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <div>
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="name"
-                      {...signupForm.register('name')}
+                      id="email"
+                      type="email"
+                      {...loginForm.register('email')}
                       className="mt-1"
                     />
-                    {signupForm.formState.errors.name && (
+                    {loginForm.formState.errors.email && (
                       <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.name.message}
+                        {loginForm.formState.errors.email.message}
                       </p>
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="mobile">Mobile Number</Label>
+                    <Label htmlFor="password">Password</Label>
                     <Input
-                      id="mobile"
-                      type="tel"
-                      {...signupForm.register('mobile')}
-                      className="mt-1"
-                    />
-                    {signupForm.formState.errors.mobile && (
-                      <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.mobile.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    {...signupForm.register('email')}
-                    className="mt-1"
-                  />
-                  {signupForm.formState.errors.email && (
-                    <p className="text-sm text-destructive mt-1">
-                      {signupForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
+                      id="password"
                       type="password"
-                      {...signupForm.register('password')}
+                      {...loginForm.register('password')}
                       className="mt-1"
                     />
-                    {signupForm.formState.errors.password && (
+                    {loginForm.formState.errors.password && (
                       <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.password.message}
+                        {loginForm.formState.errors.password.message}
                       </p>
                     )}
                   </div>
-                  <div>
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      {...signupForm.register('confirmPassword')}
-                      className="mt-1"
-                    />
-                    {signupForm.formState.errors.confirmPassword && (
-                      <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.confirmPassword.message}
-                      </p>
-                    )}
-                  </div>
+                  <Button type="submit" className="w-full">
+                    <Mail className="mr-2 h-4 w-4" />
+                    Sign In with Email
+                  </Button>
+                </form>
+
+                {/* Switch to Signup */}
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignupMode(true)}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </div>
+              </>
+            ) : (
+              // Signup Form
+              <>
+                <div className="flex items-center mb-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsSignupMode(false)}
+                    className="mr-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground">Back to Login</span>
                 </div>
 
-                <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    {...signupForm.register('address')}
-                    className="mt-1"
-                  />
-                  {signupForm.formState.errors.address && (
-                    <p className="text-sm text-destructive mt-1">
-                      {signupForm.formState.errors.address.message}
-                    </p>
-                  )}
-                </div>
+                <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        {...signupForm.register('name')}
+                        className="mt-1"
+                      />
+                      {signupForm.formState.errors.name && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.name.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="mobile">Mobile Number</Label>
+                      <Input
+                        id="mobile"
+                        type="tel"
+                        {...signupForm.register('mobile')}
+                        className="mt-1"
+                      />
+                      {signupForm.formState.errors.mobile && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.mobile.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-                <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="pincode">Pincode</Label>
+                    <Label htmlFor="signup-email">Email</Label>
                     <Input
-                      id="pincode"
-                      {...signupForm.register('pincode')}
+                      id="signup-email"
+                      type="email"
+                      {...signupForm.register('email')}
                       className="mt-1"
                     />
-                    {signupForm.formState.errors.pincode && (
+                    {signupForm.formState.errors.email && (
                       <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.pincode.message}
+                        {signupForm.formState.errors.email.message}
                       </p>
                     )}
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        {...signupForm.register('password')}
+                        className="mt-1"
+                      />
+                      {signupForm.formState.errors.password && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.password.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        {...signupForm.register('confirmPassword')}
+                        className="mt-1"
+                      />
+                      {signupForm.formState.errors.confirmPassword && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   <div>
-                    <Label htmlFor="district">District</Label>
+                    <Label htmlFor="address">Address</Label>
                     <Input
-                      id="district"
-                      {...signupForm.register('district')}
+                      id="address"
+                      {...signupForm.register('address')}
                       className="mt-1"
                     />
-                    {signupForm.formState.errors.district && (
+                    {signupForm.formState.errors.address && (
                       <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.district.message}
+                        {signupForm.formState.errors.address.message}
                       </p>
                     )}
                   </div>
-                  <div>
-                    <Label htmlFor="state">State</Label>
-                    <Select onValueChange={(value) => signupForm.setValue('state', value)}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select State" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                        <SelectItem value="delhi">Delhi</SelectItem>
-                        <SelectItem value="karnataka">Karnataka</SelectItem>
-                        <SelectItem value="gujarat">Gujarat</SelectItem>
-                        <SelectItem value="rajasthan">Rajasthan</SelectItem>
-                        <SelectItem value="up">Uttar Pradesh</SelectItem>
-                        <SelectItem value="wb">West Bengal</SelectItem>
-                        <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {signupForm.formState.errors.state && (
-                      <p className="text-sm text-destructive mt-1">
-                        {signupForm.formState.errors.state.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
 
-                <Button type="submit" className="w-full">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Create Account & Verify Mobile
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="pincode">Pincode</Label>
+                      <Input
+                        id="pincode"
+                        {...signupForm.register('pincode')}
+                        className="mt-1"
+                      />
+                      {signupForm.formState.errors.pincode && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.pincode.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="district">District</Label>
+                      <Input
+                        id="district"
+                        {...signupForm.register('district')}
+                        className="mt-1"
+                      />
+                      {signupForm.formState.errors.district && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.district.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State</Label>
+                      <Select onValueChange={(value) => signupForm.setValue('state', value)}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="maharashtra">Maharashtra</SelectItem>
+                          <SelectItem value="delhi">Delhi</SelectItem>
+                          <SelectItem value="karnataka">Karnataka</SelectItem>
+                          <SelectItem value="gujarat">Gujarat</SelectItem>
+                          <SelectItem value="rajasthan">Rajasthan</SelectItem>
+                          <SelectItem value="up">Uttar Pradesh</SelectItem>
+                          <SelectItem value="wb">West Bengal</SelectItem>
+                          <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {signupForm.formState.errors.state && (
+                        <p className="text-sm text-destructive mt-1">
+                          {signupForm.formState.errors.state.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full">
+                    <Phone className="mr-2 h-4 w-4" />
+                    Create Account & Verify Mobile
+                  </Button>
+                </form>
+              </>
+            )}
+          </div>
         )}
       </DialogContent>
     </Dialog>
