@@ -67,10 +67,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
               <ShoppingCart className="h-4 w-4 mr-1" />
               {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
             </Button>
-            <Button size="sm" variant="secondary" asChild>
-              <Link to={`/product/${product.id}`}>
-                <Eye className="h-4 w-4" />
-              </Link>
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = `/product/${product.id}`;
+              }}
+            >
+              <Eye className="h-4 w-4" />
             </Button>
           </div>
 
