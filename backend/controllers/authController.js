@@ -170,49 +170,14 @@ exports.login = async (req, res) => {
 // Google OAuth callback
 exports.googleCallback = async (req, res) => {
   try {
-    const { profile } = req.user;
-
-    // Check if user exists
-    let user = await User.findOne({ 
-      $or: [
-        { email: profile.emails[0].value },
-        { googleId: profile.id }
-      ]
-    });
-
-    if (!user) {
-      // Create new user
-      user = new User({
-        name: profile.displayName,
-        email: profile.emails[0].value,
-        googleId: profile.id,
-        googleEmail: profile.emails[0].value,
-        avatar: profile.photos[0]?.value || '',
-        isEmailVerified: true, // Google emails are verified
-        isActive: true
-      });
-      await user.save();
-    } else {
-      // Update existing user with Google info if needed
-      if (!user.googleId) {
-        user.googleId = profile.id;
-        user.googleEmail = profile.emails[0].value;
-        if (!user.avatar && profile.photos[0]) {
-          user.avatar = profile.photos[0].value;
-        }
-        await user.save();
-      }
-      // If user already has Google OAuth, just update the profile info
-      else if (user.googleId !== profile.id) {
-        // This shouldn't happen, but just in case
-        user.googleId = profile.id;
-        user.googleEmail = profile.emails[0].value;
-        if (!user.avatar && profile.photos[0]) {
-          user.avatar = profile.photos[0].value;
-        }
-        await user.save();
-      }
+    // Check if user is authenticated
+    if (!req.user) {
+      console.error('Google OAuth: No user found in request');
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+      return res.redirect(`${frontendUrl}/auth/error?message=Authentication failed`);
     }
+
+    const user = req.user;
 
     // Generate token
     const token = generateToken(user._id);
@@ -227,7 +192,7 @@ exports.googleCallback = async (req, res) => {
   } catch (error) {
     console.error('Google OAuth error:', error);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
-    res.redirect(`${frontendUrl}/auth/error`);
+    res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
   }
 };
 

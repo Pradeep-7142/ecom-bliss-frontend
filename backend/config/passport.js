@@ -25,10 +25,18 @@ passport.use(new GoogleStrategy({
   passReqToCallback: true
 }, async (req, accessToken, refreshToken, profile, done) => {
   try {
+    // Check if profile has email information
+    if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
+      console.error('Google OAuth: No email provided in profile');
+      return done(new Error('Email permission required for authentication'), null);
+    }
+
+    const email = profile.emails[0].value;
+    
     // Check if user already exists
     let user = await User.findOne({
       $or: [
-        { email: profile.emails[0].value },
+        { email: email },
         { googleId: profile.id }
       ]
     });
@@ -37,8 +45,8 @@ passport.use(new GoogleStrategy({
       // Update existing user with Google info if needed
       if (!user.googleId) {
         user.googleId = profile.id;
-        user.googleEmail = profile.emails[0].value;
-        if (!user.avatar && profile.photos[0]) {
+        user.googleEmail = email;
+        if (!user.avatar && profile.photos && profile.photos[0]) {
           user.avatar = profile.photos[0].value;
         }
         await user.save();
@@ -48,11 +56,11 @@ passport.use(new GoogleStrategy({
 
     // Create new user
     user = new User({
-      name: profile.displayName,
-      email: profile.emails[0].value,
+      name: profile.displayName || 'Google User',
+      email: email,
       googleId: profile.id,
-      googleEmail: profile.emails[0].value,
-      avatar: profile.photos[0]?.value || '',
+      googleEmail: email,
+      avatar: profile.photos && profile.photos[0] ? profile.photos[0].value : '',
       isEmailVerified: true, // Google emails are verified
       isActive: true
     });

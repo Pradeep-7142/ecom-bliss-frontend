@@ -18,13 +18,15 @@ const AuthCallback: React.FC = () => {
         const token = urlParams.get('token');
         const userData = urlParams.get('user');
         const error = urlParams.get('error');
+        const message = urlParams.get('message');
 
-        if (error) {
+        if (error || message) {
           setStatus('error');
-          setMessage('Authentication failed. Please try again.');
+          const errorMessage = message || 'Authentication failed. Please try again.';
+          setMessage(errorMessage);
           toast({
             title: "Authentication Error",
-            description: "Failed to authenticate with Google. Please try again.",
+            description: errorMessage,
             variant: "destructive",
           });
           setTimeout(() => navigate('/'), 3000);
