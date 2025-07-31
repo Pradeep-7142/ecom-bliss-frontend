@@ -13,6 +13,7 @@ import Products from "./pages/Products";
 import Categories from "./pages/Categories";
 import Deals from "./pages/Deals";
 import Profile from "./pages/Profile";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/deals" element={<Deals />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

@@ -10,7 +10,11 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & {
+    _id?: string;
+    originalPrice?: number;
+    discount?: number;
+  };
   layout?: 'grid' | 'list';
   className?: string;
 }
@@ -18,6 +22,9 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+  // Handle both API (_id) and mock (id) data structures
+  const productId = product._id || product.id;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -33,8 +40,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
     e.preventDefault();
     e.stopPropagation();
     
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
       toast({
         title: "Removed from Wishlist",
         description: `${product.name} has been removed from your wishlist.`,
@@ -50,16 +57,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
 
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
 
   return (
     <Card className={`group relative overflow-hidden hover:shadow-medium transition-all duration-300 hover:-translate-y-1 ${className}`}>
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${productId}`}>
         <div className="relative overflow-hidden">
           <img
             src={product.image}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          
+          {/* Discount badge */}
+          {hasDiscount && (
+            <Badge variant="destructive" className="absolute top-2 left-2">
+              {Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)}% OFF
+            </Badge>
+          )}
           
           {/* Overlay actions */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-2">
@@ -73,7 +88,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.location.href = `/product/${product.id}`;
+                window.location.href = `/product/${productId}`;
               }}
             >
               <Eye className="h-4 w-4" />
@@ -88,17 +103,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
             onClick={handleWishlistToggle}
           >
             <Heart 
-              className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} 
+              className={`h-4 w-4 ${isInWishlist(productId) ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} 
             />
           </Button>
 
           {/* Stock badges */}
-          {isOutOfStock && (
+          {isOutOfStock && !hasDiscount && (
             <Badge variant="destructive" className="absolute top-2 left-2">
               Out of Stock
             </Badge>
           )}
-          {isLowStock && !isOutOfStock && (
+          {isLowStock && !isOutOfStock && !hasDiscount && (
             <Badge variant="warning" className="absolute top-2 left-2">
               Low Stock
             </Badge>
@@ -139,8 +154,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
           {/* Price */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <div className="text-lg font-bold text-primary">
-                ${product.price.toFixed(2)}
+              <div className="flex items-center gap-2">
+                <div className="text-lg font-bold text-primary">
+                  ${product.price.toFixed(2)}
+                </div>
+                {hasDiscount && (
+                  <div className="text-sm text-muted-foreground line-through">
+                    ${product.originalPrice!.toFixed(2)}
+                  </div>
+                )}
               </div>
               {product.stock > 0 && (
                 <div className="text-xs text-muted-foreground">

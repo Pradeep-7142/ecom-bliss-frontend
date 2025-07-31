@@ -1,15 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones } from 'lucide-react';
+import { ArrowRight, Star, ShoppingBag, Truck, Shield, Headphones, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import ProductCard from '@/components/product/ProductCard';
-import { mockProducts, categories } from '@/data/mockProducts';
+import { useFeaturedProducts, useCategories } from '@/hooks/useProducts';
 import heroBanner from '@/assets/hero-banner.jpg';
 
 const Index = () => {
-  const featuredProducts = mockProducts.slice(0, 4);
-  const topCategories = categories.slice(0, 6);
+  const { data: featuredProducts, isLoading: featuredLoading, error: featuredError } = useFeaturedProducts(4);
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
+
+  const topCategories = categories?.slice(0, 6) || [];
 
   const features = [
     {
@@ -97,19 +99,32 @@ const Index = () => {
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">Featured Products</h2>
             <p className="text-xl text-muted-foreground">Discover our handpicked selection of premium items</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          <div className="text-center">
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/products">
-                View All Products
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
+          
+          {featuredLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : featuredError ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Failed to load featured products</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {featuredProducts?.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+              <div className="text-center">
+                <Button size="lg" variant="outline" asChild>
+                  <Link to="/products">
+                    View All Products
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -120,32 +135,39 @@ const Index = () => {
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">Shop by Category</h2>
             <p className="text-xl text-muted-foreground">Find exactly what you're looking for</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {topCategories.map((category) => (
-              <Link
-                key={category.name}
-                to={`/products?category=${encodeURIComponent(category.name)}`}
-                className="group"
-              >
-                <Card className="overflow-hidden hover:shadow-medium transition-all duration-300 hover:-translate-y-1">
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <h3 className="font-semibold text-sm mb-1">{category.name}</h3>
-                        <p className="text-xs opacity-90">{category.count} items</p>
+          
+          {categoriesLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {topCategories.map((category) => (
+                <Link
+                  key={category._id}
+                  to={`/products?category=${encodeURIComponent(category.name)}`}
+                  className="group"
+                >
+                  <Card className="overflow-hidden hover:shadow-medium transition-all duration-300 hover:-translate-y-1">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={category.image || '/placeholder.svg'}
+                        alt={category.name}
+                        className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-white">
+                          <h3 className="font-semibold text-sm mb-1">{category.name}</h3>
+                          <p className="text-xs opacity-90">{category.productCount || 0} items</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
