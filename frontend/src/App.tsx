@@ -14,6 +14,8 @@ import Categories from "./pages/Categories";
 import Deals from "./pages/Deals";
 import Profile from "./pages/Profile";
 import AuthCallback from "./pages/AuthCallback";
+import Checkout from "./pages/Checkout";
+import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/deals" element={<Deals />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/orders" element={<Orders />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

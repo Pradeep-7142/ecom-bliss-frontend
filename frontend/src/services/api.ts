@@ -196,4 +196,48 @@ export const cartAPI = {
   },
 };
 
+// Payment API functions
+export const paymentAPI = {
+  // Create payment order
+  createPaymentOrder: async (data: { items: any[]; shippingAddress: any }) => {
+    const response = await api.post('/payments/create-payment-order', data);
+    return response.data;
+  },
+
+  // Verify payment
+  verifyPayment: async (data: { 
+    orderId: string; 
+    razorpayOrderId: string; 
+    razorpayPaymentId: string; 
+    razorpaySignature: string 
+  }) => {
+    const response = await api.post('/payments/verify-payment', data);
+    return response.data;
+  },
+
+  // Get payment status
+  getPaymentStatus: async (orderId: string) => {
+    const response = await api.get(`/payments/status/${orderId}`);
+    return response.data;
+  },
+
+  // Cancel payment
+  cancelPayment: async (orderId: string) => {
+    const response = await api.delete(`/payments/cancel/${orderId}`);
+    return response.data;
+  },
+
+  // Get user orders
+  getUserOrders: async () => {
+    const response = await api.get('/payments/orders');
+    return response.data;
+  },
+
+  // Get specific order
+  getOrderById: async (orderId: string) => {
+    const response = await api.get(`/payments/orders/${orderId}`);
+    return response.data;
+  },
+};
+
 export default api; 

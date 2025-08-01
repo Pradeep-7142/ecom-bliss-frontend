@@ -36,6 +36,7 @@ require('./config/passport');
 // Import routes
 const productRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
+const paymentRoutes = require('./routes/payments');
 
 // Import error handler
 const errorHandler = require('./middleware/errorHandler');
@@ -61,7 +62,8 @@ app.get('/', (req, res) => {
       brands: '/api/products/brands',
       search: '/api/products/search',
       auth: '/api/auth',
-      google: '/api/auth/google'
+      google: '/api/auth/google',
+      payments: '/api/payments'
     }
   });
 });
@@ -69,6 +71,7 @@ app.get('/', (req, res) => {
 // API routes
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);

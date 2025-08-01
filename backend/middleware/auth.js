@@ -88,4 +88,7 @@ exports.requireRole = (roles) => {
 exports.requireAdmin = exports.requireRole(['admin']);
 
 // Customer only middleware
-exports.requireCustomer = exports.requireRole(['customer', 'admin', 'moderator']); 
+exports.requireCustomer = exports.requireRole(['customer', 'admin', 'moderator']);
+
+// Default auth middleware (alias for authenticateToken)
+// module.exports = exports.authenticateToken; 

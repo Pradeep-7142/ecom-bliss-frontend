@@ -84,6 +84,15 @@ const Header = () => {
               </Link>
             </Button>
 
+            {/* Checkout - Show only when cart has items */}
+            {getTotalItems() > 0 && (
+              <Button variant="default" size="sm" asChild>
+                <Link to="/checkout">
+                  Checkout
+                </Link>
+              </Button>
+            )}
+
             {/* User menu */}
             {user ? (
               <div className="flex items-center space-x-2">
@@ -91,6 +100,11 @@ const Header = () => {
                   <Link to="/profile">
                     <User className="h-5 w-5" />
                     <span className="hidden md:inline ml-2">{user.name}</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/orders">
+                    Orders
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" onClick={logout}>
