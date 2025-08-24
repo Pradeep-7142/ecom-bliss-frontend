@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts';
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useCategories, useBrands } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,25 +16,7 @@ import BulkImport from '@/components/admin/BulkImport';
 import InventoryManagement from '@/components/admin/InventoryManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const categories = [
-  'Electronics',
-  'Clothing',
-  'Home & Kitchen',
-  'Fitness',
-  'Gaming',
-  'Home & Office'
-];
-
-const brands = [
-  'AudioTech',
-  'FitGear',
-  'GamePro',
-  'EcoWear',
-  'BrewMaster',
-  'ChargeTech',
-  'LightCraft',
-  'SoundWave'
-];
+// Categories and brands will be loaded from database
 
 const Admin = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -56,6 +38,8 @@ const Admin = () => {
 
   const { toast } = useToast();
   const { data: productsData, isLoading } = useProducts({ limit: 100 });
+  const { data: categories } = useCategories();
+  const { data: brands } = useBrands();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -343,11 +327,11 @@ const Admin = () => {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                    {categories?.map((category) => (
+                      <SelectItem key={category._id} value={category.name}>
+                        {category.name}
                       </SelectItem>
-                    ))}
+                    )) || []}
                   </SelectContent>
                 </Select>
               </div>
@@ -358,11 +342,11 @@ const Admin = () => {
                     <SelectValue placeholder="Select brand" />
                   </SelectTrigger>
                   <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand} value={brand}>
-                        {brand}
+                    {brands?.map((brand) => (
+                      <SelectItem key={brand._id} value={brand.name}>
+                        {brand.name}
                       </SelectItem>
-                    ))}
+                    )) || []}
                   </SelectContent>
                 </Select>
               </div>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useCreateProduct } from '@/hooks/useProducts';
+import { useCreateProduct, useCategories, useBrands } from '@/hooks/useProducts';
 import { Download, Upload, FileText, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -14,11 +14,19 @@ const BulkImport = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const createProduct = useCreateProduct();
+  const { data: categories } = useCategories();
+  const { data: brands } = useBrands();
 
   const downloadTemplate = () => {
+    const categoryNames = categories?.map(cat => cat.name).join(', ') || 'Electronics, Clothing, Home & Kitchen, Fitness, Gaming, Home & Office';
+    const brandNames = brands?.map(brand => brand.name).join(', ') || 'AudioTech, FitGear, GamePro, EcoWear, BrewMaster, ChargeTech, LightCraft, SoundWave';
+    
     const csvContent = `name,price,originalPrice,discount,description,image,images,category,brand,rating,stock
 "Wireless Headphones",199.99,249.99,20,"Premium wireless headphones","https://example.com/image1.jpg","https://example.com/image2.jpg,https://example.com/image3.jpg","Electronics","AudioTech",4.5,15
-"Smart Watch",299.99,399.99,25,"Advanced smartwatch","https://example.com/watch.jpg","https://example.com/watch2.jpg","Electronics","FitGear",4.8,10`;
+"Smart Watch",299.99,399.99,25,"Advanced smartwatch","https://example.com/watch.jpg","https://example.com/watch2.jpg","Electronics","FitGear",4.8,10
+
+Available categories: ${categoryNames}
+Available brands: ${brandNames}`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -74,6 +82,22 @@ const BulkImport = () => {
     if (!product.brand) errors.push('Brand is required');
     if (!product.stock || isNaN(parseInt(product.stock))) errors.push('Valid stock quantity is required');
     if (!product.image) errors.push('Image URL is required');
+    
+    // Validate category exists in database
+    if (product.category && categories) {
+      const categoryExists = categories.some(cat => cat.name.toLowerCase() === product.category.toLowerCase());
+      if (!categoryExists) {
+        errors.push(`Category "${product.category}" not found. Available: ${categories.map(cat => cat.name).join(', ')}`);
+      }
+    }
+    
+    // Validate brand exists in database
+    if (product.brand && brands) {
+      const brandExists = brands.some(brand => brand.name.toLowerCase() === product.brand.toLowerCase());
+      if (!brandExists) {
+        errors.push(`Brand "${product.brand}" not found. Available: ${brands.map(brand => brand.name).join(', ')}`);
+      }
+    }
     
     return errors;
   };
