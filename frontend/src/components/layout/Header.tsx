@@ -107,6 +107,11 @@ const Header = () => {
                     Orders
                   </Link>
                 </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/admin">
+                    Admin
+                  </Link>
+                </Button>
                 <Button variant="outline" size="sm" onClick={logout}>
                   Logout
                 </Button>

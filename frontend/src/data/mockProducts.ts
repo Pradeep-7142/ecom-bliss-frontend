@@ -113,6 +113,21 @@ export const mockProducts: Product[] = [
     images: [
       'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&h=600&fit=crop'
     ]
+  },
+  {
+    id: '9',
+    name: 'Smart Watch Pro',
+    price: 299.99,
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
+    category: 'Electronics',
+    brand: 'FitGear',
+    rating: 4.9,
+    stock: 10,
+    description: 'Advanced smartwatch with health monitoring, GPS, and cellular connectivity.',
+    images: [
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1544117519-31a4b719223d?w=600&h=600&fit=crop'
+    ]
   }
 ];
 

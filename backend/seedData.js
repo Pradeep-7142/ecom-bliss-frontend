@@ -216,6 +216,22 @@ const products = [
     brand: 'SoundWave',
     rating: 4.7,
     stock: 18
+  },
+  {
+    name: 'Smart Watch Pro',
+    price: 299.99,
+    originalPrice: 399.99,
+    discount: 25,
+    description: 'Advanced smartwatch with health monitoring, GPS, and cellular connectivity.',
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1544117519-31a4b719223d?w=600&h=600&fit=crop'
+    ],
+    category: 'Electronics',
+    brand: 'FitGear',
+    rating: 4.9,
+    stock: 10
   }
 ];
 
