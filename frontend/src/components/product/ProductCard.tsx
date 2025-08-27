@@ -155,14 +155,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) =>
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="text-lg font-bold text-primary">
-                  ${product.price.toFixed(2)}
+                              <div className="text-lg font-bold text-primary">
+                ₹{product.price.toLocaleString()}
+              </div>
+              {hasDiscount && (
+                <div className="text-sm text-muted-foreground line-through">
+                  ₹{product.originalPrice!.toLocaleString()}
                 </div>
-                {hasDiscount && (
-                  <div className="text-sm text-muted-foreground line-through">
-                    ${product.originalPrice!.toFixed(2)}
-                  </div>
-                )}
+              )}
               </div>
               {product.stock > 0 && (
                 <div className="text-xs text-muted-foreground">
