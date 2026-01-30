@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <button onclick="testAPI()">Test API Connection</button>
+    <button onclick="testSignup()">Test Signup</button>
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'test3@example.com',
+                        password: 'password123',
+                        phone: '1234567890'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h3>API Test Result:</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Response: ${JSON.stringify(data, null, 2)}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>API Test Error:</h3>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testSignup() {
+            const resultDiv = document.getElementById('result');
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Frontend Test User',
+                        email: 'frontend-test@example.com',
+                        password: 'password123',
+                        phone: '9876543210'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h3>Signup Test Result:</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Response: ${JSON.stringify(data, null, 2)}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>Signup Test Error:</h3>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 
